@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tài Xỉu Dice Game</title>
+    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: { primary: "#4f46e5", secondary: "#f59e0b" },
+            borderRadius: {
+              none: "0px",
+              sm: "4px",
+              DEFAULT: "8px",
+              md: "12px",
+              lg: "16px",
+              xl: "20px",
+              "2xl": "24px",
+              "3xl": "32px",
+              full: "9999px",
+              button: "8px",
+            },
+          },
+        },
+      };
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"
+    />
+    <style>
+      :where([class^="ri-"])::before { content: "\f3c2"; }
+      body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f8fafc;
+      }
+      .dice {
+      transition: transform 0.5s ease-in-out;
+      }
+      .dice.rolling {
+      transform: rotateY(720deg);
+      }
+      .result-text {
+      transition: all 0.3s ease;
+      }
+      .roll-btn {
+      transition: all 0.2s ease;
+      }
+      .roll-btn:active {
+      transform: scale(0.95);
+      }
+    </style>
+  </head>
+  <body class="min-h-screen flex flex-col items-center justify-center p-4">
+    <div
+      class="w-full max-w-lg mx-auto bg-white rounded-2xl shadow-lg overflow-hidden"
+    >
+      <div class="bg-gradient-to-r from-primary to-purple-600 p-6 text-center">
+        <h1 class="text-3xl font-['Pacifico'] text-white mb-1">
+          Tài Xỉu Dice Game
+        </h1>
+        <p class="text-white/80 text-sm">Roll the dice and test your luck!</p>
+        <div class="flex justify-center gap-6">
+          <div class="mt-4 bg-white/10 rounded-lg p-4 inline-block">
+            <span class="text-white text-lg">Balance: </span>
+            <span class="text-2xl font-bold text-yellow-300"
+              >$<span id="balance">1000</span></span
+            >
+          </div>
+          <div class="mt-4 bg-white/10 rounded-lg p-4 inline-block">
+            <span class="text-white text-lg">Money Pot: </span>
+            <span class="text-2xl font-bold text-yellow-300"
+              >$<span id="money-pot">0</span></span
+            >
+          </div>
+        </div>
+      </div>
+      <div class="p-8">
+        <!-- Betting Area -->
+        <div class="mb-8">
+          <div class="flex gap-4 items-center justify-center mb-4">
+            <div class="relative">
+              <input
+                type="number"
+                id="bet-amount"
+                placeholder="Enter bet amount"
+                class="w-48 px-4 py-2 rounded-button border border-gray-200 focus:border-primary focus:outline-none text-gray-700"
+              />
+              <span
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400"
+                >$</span
+              >
+            </div>
+            <div class="flex gap-2">
+              <button
+                id="bet-tai"
+                class="px-6 py-2 !rounded-button border-2 border-red-500 text-red-500 hover:bg-red-50 font-semibold whitespace-nowrap"
+              >
+                TÀI
+              </button>
+              <button
+                id="bet-xiu"
+                class="px-6 py-2 !rounded-button border-2 border-blue-500 text-blue-500 hover:bg-blue-50 font-semibold whitespace-nowrap"
+              >
+                XỈU
+              </button>
+            </div>
+          </div>
+          <p id="bet-info" class="text-center text-sm text-gray-500">
+            Select your bet type and amount
+          </p>
+        </div>
+        <!-- Dice Display Area -->
+        <div class="flex justify-center gap-6 my-8">
+          <div
+            id="dice1"
+            class="dice w-20 h-20 bg-white border-2 border-gray-200 rounded-lg shadow-md flex items-center justify-center text-3xl font-bold text-primary"
+          >
+            1
+          </div>
+          <div
+            id="dice2"
+            class="dice w-20 h-20 bg-white border-2 border-gray-200 rounded-lg shadow-md flex items-center justify-center text-3xl font-bold text-primary"
+          >
+            1
+          </div>
+          <div
+            id="dice3"
+            class="dice w-20 h-20 bg-white border-2 border-gray-200 rounded-lg shadow-md flex items-center justify-center text-3xl font-bold text-primary"
+          >
+            1
+          </div>
+        </div>
+        <!-- Result Display Section -->
+        <div class="text-center mb-8">
+          <p class="text-xl text-gray-700 mb-2">
+            Total Score: <span id="total-score" class="font-semibold">3</span>
+          </p>
+          <div class="mt-4">
+            <span
+              id="result"
+              class="result-text inline-block text-4xl font-bold px-8 py-3 rounded-lg bg-blue-100 text-blue-600"
+              >XỈU</span
+            >
+          </div>
+        </div>
+        <!-- Control Section -->
+        <div class="text-center">
+          <button
+            id="roll-btn"
+            class="roll-btn bg-primary hover:bg-primary/90 text-white font-bold py-4 px-12 !rounded-button shadow-lg flex items-center justify-center gap-2 whitespace-nowrap mx-auto"
+          >
+            <span class="w-6 h-6 flex items-center justify-center">
+              <i class="ri-dice-line ri-lg"></i>
+            </span>
+            Roll Dice
+          </button>
+        </div>
+      </div>
+      <!-- Result History -->
+      <div class="flex justify-center gap-2 mb-6">
+        <div id="result-history" class="flex gap-2"></div>
+      </div>
+      <!-- Game Rules -->
+      <div class="bg-gray-50 p-6 border-t border-gray-200">
+        <h3 class="font-semibold text-gray-700 mb-2">Game Rules:</h3>
+        <ul class="text-sm text-gray-600 space-y-1">
+          <li>• Roll three dice and add up their values</li>
+          <li>
+            • Total 3-10:
+            <span class="text-blue-600 font-medium">XỈU</span> (Small)
+          </li>
+          <li>
+            • Total 11-18:
+            <span class="text-red-600 font-medium">TÀI</span> (Big)
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div
+      id="game-over"
+      class="fixed inset-0 bg-black/80 flex items-center justify-center hidden z-50"
+    >
+      <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 text-center">
+        <h2 class="text-4xl font-bold text-gray-800 mb-4">Game Over!</h2>
+        <p class="text-gray-600 mb-8">Your balance has reached $0</p>
+        <button
+          id="play-again"
+          class="bg-primary hover:bg-primary/90 text-white font-bold py-4 px-12 !rounded-button shadow-lg"
+        >
+          Play Again
+        </button>
+      </div>
+    </div>
+    <script id="dice-game-logic">
+      document.addEventListener("DOMContentLoaded", function () {
+        const gameOver = document.getElementById("game-over");
+        const playAgain = document.getElementById("play-again");
+        const resultHistory = document.getElementById("result-history");
+        const moneyPotDisplay = document.getElementById("money-pot");
+        let gameHistory = [];
+        let moneyPot = 0;
+        const dice1 = document.getElementById("dice1");
+        const dice2 = document.getElementById("dice2");
+        const dice3 = document.getElementById("dice3");
+        const totalScore = document.getElementById("total-score");
+        const result = document.getElementById("result");
+        const rollBtn = document.getElementById("roll-btn");
+        const betAmount = document.getElementById("bet-amount");
+        const betTai = document.getElementById("bet-tai");
+        const betXiu = document.getElementById("bet-xiu");
+        const betInfo = document.getElementById("bet-info");
+        const balanceDisplay = document.getElementById("balance");
+        let diceValues = [1, 1, 1];
+        let currentBalance = 1000;
+        let selectedBet = "";
+        let currentBetAmount = 0;
+        betTai.addEventListener("click", () => {
+          selectedBet = "TÀI";
+          betTai.classList.add("bg-red-500", "text-white");
+          betTai.classList.remove("text-red-500");
+          betXiu.classList.remove("bg-blue-500", "text-white");
+          betXiu.classList.add("text-blue-500");
+          updateBetInfo();
+        });
+        betXiu.addEventListener("click", () => {
+          selectedBet = "XỈU";
+          betXiu.classList.add("bg-blue-500", "text-white");
+          betXiu.classList.remove("text-blue-500");
+          betTai.classList.remove("bg-red-500", "text-white");
+          betTai.classList.add("text-red-500");
+          updateBetInfo();
+        });
+        function updateBetInfo() {
+          const amount = Number(betAmount.value);
+          if (amount && selectedBet) {
+            betInfo.textContent = `Betting ${amount}$ on ${selectedBet}`;
+            betInfo.classList.remove("text-red-500");
+          }
+        }
+        betAmount.addEventListener("input", updateBetInfo);
+        updateDisplay();
+        rollBtn.addEventListener("click", rollDice);
+        function rollDice() {
+          const amount = Number(betAmount.value);
+          if (!amount || !selectedBet) {
+            betInfo.textContent = "Please select bet type and amount first!";
+            betInfo.classList.add("text-red-500");
+            return;
+          }
+          if (amount > currentBalance) {
+            betInfo.textContent = "Insufficient balance!";
+            betInfo.classList.add("text-red-500");
+            return;
+          }
+          if (amount <= 0) {
+            betInfo.textContent = "Please enter a valid bet amount!";
+            betInfo.classList.add("text-red-500");
+            return;
+          }
+          currentBetAmount = amount;
+          rollBtn.disabled = true;
+          betTai.disabled = true;
+          betXiu.disabled = true;
+          betAmount.disabled = true;
+          [dice1, dice2, dice3].forEach((dice) => {
+            dice.classList.add("rolling");
+          });
+          // Generate random values
+          setTimeout(() => {
+            diceValues = [
+              Math.floor(Math.random() * 6) + 1,
+              Math.floor(Math.random() * 6) + 1,
+              Math.floor(Math.random() * 6) + 1,
+            ];
+            // Remove animation class
+            [dice1, dice2, dice3].forEach((dice) => {
+              dice.classList.remove("rolling");
+            });
+            updateDisplay();
+            // Re-enable button
+            rollBtn.disabled = false;
+          }, 500);
+        }
+        function updateResultHistory(result) {
+          gameHistory.push(result);
+          if (gameHistory.length > 10) {
+            gameHistory.shift();
+          }
+          resultHistory.innerHTML = gameHistory
+            .map(
+              (res) =>
+                `<div class="w-3 h-3 rounded-full ${res === "TÀI" ? "bg-red-500" : "bg-blue-500"}"></div>`,
+            )
+            .join("");
+        }
+        function checkGameOver() {
+          if (currentBalance <= 0) {
+            gameOver.classList.remove("hidden");
+          }
+        }
+        playAgain.addEventListener("click", () => {
+          currentBalance = 1000;
+          moneyPot = 0;
+          moneyPotDisplay.textContent = "0.00";
+          balanceDisplay.textContent = currentBalance.toFixed(2);
+          gameOver.classList.add("hidden");
+          gameHistory = [];
+          resultHistory.innerHTML = "";
+          selectedBet = "";
+          betTai.classList.remove("bg-red-500", "text-white");
+          betXiu.classList.remove("bg-blue-500", "text-white");
+          betTai.classList.add("text-red-500");
+          betXiu.classList.add("text-blue-500");
+          betAmount.value = "";
+          updateBetInfo();
+        });
+        function updateDisplay() {
+          dice1.textContent = diceValues[0];
+          dice2.textContent = diceValues[1];
+          dice3.textContent = diceValues[2];
+          const total = diceValues.reduce((sum, val) => sum + val, 0);
+          totalScore.textContent = total;
+          const gameResult = total >= 3 && total <= 10 ? "XỈU" : "TÀI";
+          result.textContent = gameResult;
+          result.className =
+            gameResult === "XỈU"
+              ? "result-text inline-block text-4xl font-bold px-8 py-3 rounded-lg bg-blue-100 text-blue-600"
+              : "result-text inline-block text-4xl font-bold px-8 py-3 rounded-lg bg-red-100 text-red-600";
+          if (rollBtn.disabled) {
+            moneyPot += currentBetAmount * 0.05;
+            moneyPotDisplay.textContent = moneyPot.toFixed(2);
+            if (gameResult === selectedBet) {
+              let winAmount = currentBetAmount * 0.95;
+              if (total === 3 || total === 18) {
+                winAmount += moneyPot;
+                betInfo.textContent = `Jackpot! You won ${winAmount.toFixed(2)}$!`;
+                moneyPot = 0;
+                moneyPotDisplay.textContent = "0.00";
+              } else {
+                betInfo.textContent = `You won ${winAmount.toFixed(2)}$!`;
+              }
+              currentBalance += winAmount;
+              betInfo.classList.add("text-green-500");
+              betInfo.classList.remove("text-red-500");
+            } else {
+              currentBalance -= currentBetAmount;
+              betInfo.textContent = `You lost ${currentBetAmount}$!`;
+              betInfo.classList.add("text-red-500");
+              betInfo.classList.remove("text-green-500");
+            }
+            balanceDisplay.textContent = currentBalance.toFixed(2);
+            updateResultHistory(gameResult);
+            checkGameOver();
+            setTimeout(() => {
+              rollBtn.disabled = false;
+              betTai.disabled = false;
+              betXiu.disabled = false;
+              betAmount.disabled = false;
+              selectedBet = "";
+              betTai.classList.remove("bg-red-500", "text-white");
+              betXiu.classList.remove("bg-blue-500", "text-white");
+              betTai.classList.add("text-red-500");
+              betXiu.classList.add("text-blue-500");
+              betAmount.value = "";
+            }, 1500);
+          }
+        }
+      });
+    </script>
+  </body>
+</html>
